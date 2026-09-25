@@ -23,8 +23,8 @@ public class ResponseHandler {
   }
 
   // 204 No Content
-  public static <T> ResponseEntity<ApiResponse<T>> noContent(String message) {
-    return buildResponse(HttpStatus.NO_CONTENT, message, null);
+  public static ResponseEntity<Void> noContent() {
+    return ResponseEntity.noContent().build();
   }
 
   // 301 Moved Permanently
@@ -38,8 +38,8 @@ public class ResponseHandler {
   }
 
   // 304 Not Modified
-  public static <T> ResponseEntity<ApiResponse<T>> notModified(String message) {
-    return buildResponse(HttpStatus.NOT_MODIFIED, message, null);
+  public static ResponseEntity<Void> notModified() {
+    return ResponseEntity.status(HttpStatus.NOT_MODIFIED).build();
   }
 
   // 307 Temporary Redirect
@@ -115,6 +115,11 @@ public class ResponseHandler {
   // 505 HTTP Version Not Supported
   public static <T> ResponseEntity<ApiResponse<T>> httpVersionNotSupported(String message) {
     return buildResponse(HttpStatus.HTTP_VERSION_NOT_SUPPORTED, message, null);
+  }
+
+  // Generator generic untuk error response
+  public static <T> ResponseEntity<ApiResponse<T>> buildError(HttpStatus status, String message) {
+    return buildResponse(status, message, null);
   }
 
   // Generator standar untuk response JSON biasa

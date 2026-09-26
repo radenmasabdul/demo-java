@@ -3,6 +3,8 @@ package com.example.demo.service;
 import com.example.demo.dto.request.CreateUserRequest;
 import com.example.demo.dto.request.UpdateUserRequest;
 import com.example.demo.dto.response.UserResponse;
+import com.example.demo.entity.Role;
+import com.example.demo.entity.Status;
 import com.example.demo.entity.User;
 import com.example.demo.exception.AppException;
 import com.example.demo.mapper.UserMapper;
@@ -10,6 +12,11 @@ import com.example.demo.repository.UserRepository;
 import com.example.demo.specification.GenericSpecification;
 import com.example.demo.util.RepositoryUtils;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -33,10 +40,17 @@ public class UserService {
     return userMapper.toResponse(savedUser);
   }
 
-  public List<UserResponse> getAllUsers(String search) {
-    List<String> columnToSearch = Arrays.asList("name", "email");
-    List<User> users = userRepository.findAll(GenericSpecification.searchByColumn(search, columnToSearch));
-    return userMapper.toResponseList(users);
+  public Page<UserResponse> getAllUsers(String search, Role role, Status status, int page, int size) {
+    List<String> columnToSearch = Arrays.asList("name", "email", "username");
+
+    Specification<User> spec = Specification.<User>where(GenericSpecification.searchByColumn(search, columnToSearch))
+        .and(GenericSpecification.<User>equalsColumn("role", role))
+        .and(GenericSpecification.<User>equalsColumn("status", status));
+
+    Pageable pageable = PageRequest.of(page, size);
+    Page<User> userPage = userRepository.findAll(spec, pageable);
+
+    return userPage.map(userMapper::toResponse);
   }
 
   public UserResponse getUserById(String id) {

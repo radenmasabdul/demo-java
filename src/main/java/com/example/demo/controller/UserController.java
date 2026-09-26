@@ -4,8 +4,15 @@ import com.example.demo.dto.ApiResponse;
 import com.example.demo.dto.request.CreateUserRequest;
 import com.example.demo.dto.request.UpdateUserRequest;
 import com.example.demo.dto.response.UserResponse;
+import com.example.demo.entity.Role;
+import com.example.demo.entity.Status;
 import com.example.demo.service.UserService;
 import com.example.demo.util.ResponseHandler;
+
+import jakarta.validation.Valid;
+
+import java.util.Collections;
+import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,8 +25,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -31,8 +36,15 @@ public class UserController {
   }
 
   @GetMapping
-  public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers(@RequestParam(required = false) String search) {
-    return ResponseHandler.ok("User retrieved successfully", userService.getAllUsers(search));
+  public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers(
+    @RequestParam(required = false) String search,
+    @RequestParam(required = false) Role role,
+    @RequestParam(required = false) Status status,
+    @RequestParam(defaultValue = "0") int page,
+    @RequestParam(defaultValue = "10") int size)
+  {
+    return ResponseHandler.okPage("User retrieved successfully",
+    userService.getAllUsers(search, role, status, page, size));
   }
 
   @GetMapping("/{id}")
@@ -41,18 +53,18 @@ public class UserController {
   }
 
   @PostMapping
-  public ResponseEntity<ApiResponse<UserResponse>> createUser(@RequestBody CreateUserRequest request) {
+  public ResponseEntity<ApiResponse<UserResponse>> createUser(@Valid @RequestBody CreateUserRequest request) {
     return ResponseHandler.created("New user successfully added", userService.createUser(request));
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<ApiResponse<UserResponse>> updateUser(@PathVariable String id, @RequestBody UpdateUserRequest request) {
+  public ResponseEntity<ApiResponse<UserResponse>> updateUser(@PathVariable String id, @Valid @RequestBody UpdateUserRequest request) {
     return ResponseHandler.ok("User data successfully updated", userService.updateUser(id, request));
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> deleteUser(@PathVariable String id) {
+  public ResponseEntity<ApiResponse<List<UserResponse>>> deleteUser(@PathVariable String id) {
     userService.deleteUser(id);
-    return ResponseHandler.noContent();
+    return ResponseHandler.ok("User delete successfully", Collections.emptyList());
   }
 }

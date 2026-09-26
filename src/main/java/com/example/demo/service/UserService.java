@@ -1,52 +1,54 @@
 package com.example.demo.service;
 
+import com.example.demo.dto.request.CreateUserRequest;
+import com.example.demo.dto.request.UpdateUserRequest;
+import com.example.demo.dto.response.UserResponse;
 import com.example.demo.entity.User;
 import com.example.demo.exception.AppException;
+import com.example.demo.mapper.UserMapper;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.specification.GenericSpecification;
-
-import java.util.Arrays;
-import java.util.List;
+import com.example.demo.util.RepositoryUtils;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Service
 public class UserService {
 
   private final UserRepository userRepository;
+  private final UserMapper userMapper;
 
-  public UserService(UserRepository userRepository) {
+  public UserService(UserRepository userRepository, UserMapper userMapper) {
     this.userRepository = userRepository;
+    this.userMapper = userMapper;
   }
 
-  public User createUser(User user) {
-    return userRepository.save(user);
+  public UserResponse createUser(CreateUserRequest request) {
+    User user = userMapper.toEntity(request);
+    User savedUser = userRepository.save(user);
+    return userMapper.toResponse(savedUser);
   }
 
-  public List<User> getAllUsers(String search) {
+  public List<UserResponse> getAllUsers(String search) {
     List<String> columnToSearch = Arrays.asList("name", "email");
-    return userRepository.findAll(GenericSpecification.searchByColumn(search, columnToSearch));
+    List<User> users = userRepository.findAll(GenericSpecification.searchByColumn(search, columnToSearch));
+    return userMapper.toResponseList(users);
   }
 
-  public User getUserById(String id) {
-    return userRepository.findById(id)
-      .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User with ID " + id + " was not found")
-    );
+  public UserResponse getUserById(String id) {
+    User user = RepositoryUtils.findOrThrow(userRepository, id, "User");
+    return userMapper.toResponse(user);
   }
 
-  public User updateUser(String id, User userDetails) {
-    return userRepository.findById(id)
-      .map(user -> {
-        user.setRole(userDetails.getRole());
-        user.setStatus(userDetails.getStatus());
-        user.setPhoneNumber(userDetails.getPhoneNumber());
-        user.setProfileImageUrl(userDetails.getProfileImageUrl());
-
-        return userRepository.save(user);
-      })
-      .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User with ID " + id + " was not found")
-    );
+  public UserResponse updateUser(String id, UpdateUserRequest request) {
+    User user = RepositoryUtils.findOrThrow(userRepository, id, "User");
+    userMapper.updateEntityFromRequest(request, user);
+    User updatedUser = userRepository.save(user);
+    return userMapper.toResponse(updatedUser);
   }
 
   public void deleteUser(String id) {

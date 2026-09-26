@@ -1,7 +1,9 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.ApiResponse;
-import com.example.demo.entity.User;
+import com.example.demo.dto.request.CreateUserRequest;
+import com.example.demo.dto.request.UpdateUserRequest;
+import com.example.demo.dto.response.UserResponse;
 import com.example.demo.service.UserService;
 import com.example.demo.util.ResponseHandler;
 
@@ -29,27 +31,23 @@ public class UserController {
   }
 
   @GetMapping
-  public ResponseEntity<ApiResponse<List<User>>> getAllUsers(@RequestParam(required = false) String search) {
-    List<User> users = userService.getAllUsers(search);
-    return ResponseHandler.ok("User retrieved successfully", users);
+  public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers(@RequestParam(required = false) String search) {
+    return ResponseHandler.ok("User retrieved successfully", userService.getAllUsers(search));
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<ApiResponse<User>> getUserById(@PathVariable String id) {
-    User user = userService.getUserById(id);
-    return ResponseHandler.ok("User details found", user);
+  public ResponseEntity<ApiResponse<UserResponse>> getUserById(@PathVariable String id) {
+    return ResponseHandler.ok("User details found", userService.getUserById(id));
   }
 
   @PostMapping
-  public ResponseEntity<ApiResponse<User>> createUser(@RequestBody User user) {
-    User savedUser = userService.createUser(user);
-    return ResponseHandler.created("New user successfully added", savedUser);
+  public ResponseEntity<ApiResponse<UserResponse>> createUser(@RequestBody CreateUserRequest request) {
+    return ResponseHandler.created("New user successfully added", userService.createUser(request));
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<ApiResponse<User>> updateUser(@PathVariable String id, @RequestBody User userDetails) {
-    User updatedUser = userService.updateUser(id, userDetails);
-    return ResponseHandler.ok("User data successfully updated", updatedUser);
+  public ResponseEntity<ApiResponse<UserResponse>> updateUser(@PathVariable String id, @RequestBody UpdateUserRequest request) {
+    return ResponseHandler.ok("User data successfully updated", userService.updateUser(id, request));
   }
 
   @DeleteMapping("/{id}")

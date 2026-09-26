@@ -1,14 +1,14 @@
 package com.example.demo.specification;
 
 import jakarta.persistence.criteria.Predicate;
-import org.springframework.data.jpa.domain.Specification;
 import java.util.List;
 import java.util.ArrayList;
+
+import org.springframework.data.jpa.domain.Specification;
 
 public class GenericSpecification {
 
   public static <T> Specification<T> searchByColumn(String keyword, List<String> columns) {
-
     return (root, query, criteriaBuilder) -> {
       if (keyword == null || keyword.trim().isEmpty() || columns == null || columns.isEmpty()) {
         return criteriaBuilder.conjunction();
@@ -26,6 +26,26 @@ public class GenericSpecification {
       }
 
       return criteriaBuilder.or(predicates.toArray(new Predicate[0]));
+    };
+  }
+
+  public static <T> Specification<T> equalsColumn(String column, Object value) {
+    return (root, query, criteriaBuilder) -> {
+      if (value == null) {
+        return criteriaBuilder.conjunction();
+      }
+
+      return criteriaBuilder.equal(root.get(column), value);
+    };
+  }
+
+  public static <T> Specification<T> inColumn(String column, List<?> values) {
+    return (root, query, criteriaBuilder) -> {
+      if (values == null || values.isEmpty()) {
+        return criteriaBuilder.conjunction();
+      }
+
+      return root.get(column).in(values);
     };
   }
 }

@@ -1,15 +1,33 @@
 package com.example.demo.util;
 
 import com.example.demo.dto.ApiResponse;
+
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import java.net.URI;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class ResponseHandler {
   // 200 OK
   public static <T> ResponseEntity<ApiResponse<T>> ok(String message, T data) {
     return buildResponse(HttpStatus.OK, message, data);
+  }
+
+  // 200 OK dengan pagination
+  public static <T> ResponseEntity<ApiResponse<List<T>>> okPage(String message, Page<T> page) {
+    ApiResponse<List<T>> response = ApiResponse.<List<T>>builder()
+        .status(HttpStatus.OK.value())
+        .message(message)
+        .data(page.getContent())
+        .page(page.getNumber())
+        .size(page.getSize())
+        .totalElements(page.getTotalElements())
+        .totalPages(page.getTotalPages())
+        .timestamp(LocalDateTime.now())
+        .build();
+    return ResponseEntity.ok(response);
   }
 
   // 201 Created

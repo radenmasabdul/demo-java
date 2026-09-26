@@ -2,6 +2,8 @@ package com.example.demo.entity;
 
 import java.time.Instant;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -35,7 +37,12 @@ public class User {
 
   private String phoneNumber;
   private String profileImageUrl;
+
+  @CreationTimestamp
+  @Column(updatable = false)
   private Instant createdAt;
+
+  @CreationTimestamp
   private Instant updatedAt;
 
   public User() {
